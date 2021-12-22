@@ -20,7 +20,8 @@
 
     'depends': [
         'base',
-        'contacts'
+        'contacts',
+        'partner_autocomplete'
     ],
 
     'data': [
