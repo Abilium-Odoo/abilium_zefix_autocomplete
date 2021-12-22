@@ -57,9 +57,7 @@ class ZefixAutocomplete(models.Model):
             if res.status_code != 200:
                 _logger.info('Error Response, Status Code: %d' % res.status_code)
 
-            res = self._format_zefix_company_full_data(res.json())
-            _logger.info(res)
-            return res
+            return self._format_zefix_company_full_data(res.json())
 
     @api.model
     def _get_zefix_auth(self):
@@ -70,9 +68,7 @@ class ZefixAutocomplete(models.Model):
     @api.model
     def _get_zefix_api_url(self):
         prod = self.env['ir.config_parameter'].sudo().get_param('zefix_autocomplete.zefix_is_prod')
-        url = ZEFIX_API_PROD if prod else ZEFIX_API_TEST
-        _logger.info(url)
-        return url
+        return ZEFIX_API_PROD if prod else ZEFIX_API_TEST
 
     @api.model
     def _format_zefix_companies_short_data(self, companies):
