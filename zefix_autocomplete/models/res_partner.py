@@ -73,13 +73,16 @@ class ZefixAutocomplete(models.Model):
     @api.model
     def _format_zefix_companies_short_data(self, companies):
         results = []
-
+        country = self.env['res.country'].search([('code', '=', 'CH')])
+        country_id = ''
+        if country:
+            country_id = {'id': country.id, 'code': country.code, 'display_name': country.display_name}
         for company in companies:
             results.append({
                 'name': company.get('name'),
                 'zefix_uid': company.get('uid'),
                 'vat': company.get('uid')[:3] + '-' + company.get('uid')[3:6] + '.' + company.get('uid')[6:9] + '.' + company.get('uid')[9:12] + ' MWST',
-                'country_id': self.env['res.country'].search([('code', '=', 'CH')])
+                'country_id': country_id
             })
 
         return results
@@ -89,9 +92,13 @@ class ZefixAutocomplete(models.Model):
         assert len(company_list) == 1
 
         company = company_list[0]
+        country = self.env['res.country'].search([('code', '=', 'CH')])
+        country_id = ''
+        if country:
+            country_id = {'id': country.id, 'code': country.code, 'display_name': country.display_name}
         return {
             'name': company.get('name'),
-            'country_id': self.env['res.country'].search([('code', '=', 'CH')]),
+            'country_id': country_id,
             'street': company.get('address').get('street') + ' ' + company.get('address').get('houseNumber'),
             'street2': company.get('address').get('addon'),
             'zip': company.get('address').get('swissZipCode'),
