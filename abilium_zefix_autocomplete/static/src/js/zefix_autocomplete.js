@@ -1,4 +1,4 @@
-odoo.define('zefix_autocomplete.autocomplete', function(require) {
+odoo.define('abilium_zefix_autocomplete.autocomplete', function(require) {
 	"use strict";
 
 	var PartnerAutocompleteMixin = require('partner.autocomplete.Mixin');
