@@ -79,7 +79,7 @@ class ZefixAutocomplete(models.Model):
                 'name': company.get('name'),
                 'zefix_uid': company.get('uid'),
                 'vat': company.get('uid')[:3] + '-' + company.get('uid')[3:6] + '.' + company.get('uid')[6:9] + '.' + company.get('uid')[9:12] + ' MWST',
-                'country_id': self.env.['res.country'].search([('code', '=', 'CH')])
+                'country_id': self.env['res.country'].search([('code', '=', 'CH')])
             })
 
         return results
@@ -91,7 +91,7 @@ class ZefixAutocomplete(models.Model):
         company = company_list[0]
         return {
             'name': company.get('name'),
-            'country_id': self.env.['res.country'].search([('code', '=', 'CH')]),
+            'country_id': self.env['res.country'].search([('code', '=', 'CH')]),
             'street': company.get('address').get('street') + ' ' + company.get('address').get('houseNumber'),
             'street2': company.get('address').get('addon'),
             'zip': company.get('address').get('swissZipCode'),
