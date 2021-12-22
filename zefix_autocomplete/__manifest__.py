@@ -3,12 +3,11 @@
     'name': "Zefix Autocomplete",
 
     'summary': """
-        Short (1 phrase/line) summary of the module's purpose, used as
-        subtitle on modules listing or apps.openerp.com
+        Fetches company details when entering the company name from the swiss company register Zefix.ch
     """,
 
     'description': """
-        Long description of module's purpose
+        The credentials can be specified in the configuration settings
     """,
 
     'author': "Abilium GmbH",
