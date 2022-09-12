@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from json import JSONDecodeError
 from requests import post, get, exceptions
 from requests.auth import HTTPBasicAuth
 import logging
@@ -42,7 +43,12 @@ class ZefixAutocomplete(models.Model):
             if res.status_code != 200:
                 _logger.info('Error Response, Status Code: %d' % res.status_code)
 
-            return self._format_zefix_companies_short_data(res.json())
+            try:
+                js = res.json()
+            except (JSONDecodeError):
+                pass
+                js = []
+            return self._format_zefix_companies_short_data(js)
 
     @api.model
     def _enrich_zefix_company(self, zefix_uid):
