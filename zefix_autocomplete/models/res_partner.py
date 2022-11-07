@@ -26,7 +26,8 @@ class ZefixAutocomplete(models.Model):
         results = super(ZefixAutocomplete, self).autocomplete(query)
 
         zefix_results = self._search_zefix(query)
-        zefix_results.extend(results)
+        if zefix_results:
+            zefix_results.extend(results)
         return zefix_results
 
     @api.model
