@@ -18,13 +18,17 @@
     'application': True,
 
     'depends': [
-        'base',
         'contacts',
         'partner_autocomplete'
     ],
 
     'data': [
         'views/config_settings.xml',
-        'static/src/base.xml'
-    ]
+    ],
+    'assets': {
+        'web.assets_backend': [
+            'zefix_autocomplete/static/src/js/*',
+            'zefix_autocomplete/static/src/xml/*'
+        ]
+    }
 }

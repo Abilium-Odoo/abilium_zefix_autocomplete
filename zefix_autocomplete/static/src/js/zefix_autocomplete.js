@@ -1,15 +1,18 @@
-odoo.define('zefix_autocomplete.autocomplete', function(require) {
-	"use strict";
+/** @odoo-module **/
 
-	var PartnerAutocompleteMixin = require('partner.autocomplete.Mixin');
+import { usePartnerAutocomplete } from "@partner_autocomplete/js/partner_autocomplete_core";
+import { patch } from "@web/core/utils/patch";
+import { useService } from "@web/core/utils/hooks";
 
-	PartnerAutocompleteMixin._enrichCompany = function (company) {
-		return this._rpc({
+
+patch(usePartnerAutocomplete.prototype, {
+    const orm = useService("orm");
+
+    enrichCompany(company) {
+        return orm.call({
 			model: 'res.partner',
 			method: 'enrich_company',
 			args: [company.website, company.partner_gid, company.vat, company.zefix_uid],
 		});
-	}
-
-	return PartnerAutocompleteMixin;
+    }
 });
