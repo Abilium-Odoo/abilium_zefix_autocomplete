@@ -106,7 +106,6 @@ class ResPartner(models.Model):
         results = super(ResPartner, self).autocomplete_by_name(query, query_country_id)
         zefix_results = self._search_zefix(query)
         for result in zefix_results:
-            _logger.info(result)
             result['duns'] = "ZEFIX" + result['zefix_uid']
             result['city'] = result.get('zefix_uid')[:3] + '-' + result.get('zefix_uid')[3:6] + '.' + result.get('zefix_uid')[6:9] + '.' + result.get('zefix_uid')[9:12] + ' MWST'
         zefix_results.extend(results)
@@ -114,17 +113,12 @@ class ResPartner(models.Model):
 
     @api.model
     def _format_data_company(self, iap_data):
-        _logger.info("before clean")
-        _logger.info(iap_data)
         self._iap_replace_location_codes(iap_data)
         self._iap_replace_language_codes(iap_data)
-        _logger.info("after clean")
-        _logger.info(iap_data)
         return iap_data
 
     @api.model
     def enrich_by_duns(self, duns, timeout=15):
-        _logger.info(duns)
         if duns[:5] == "ZEFIX":
             zefix_uid = duns[5:]
             uid = re.sub(r'([.-])|( MWST)', '', zefix_uid)
