@@ -8,7 +8,7 @@ Prerequisite
 
 In order to be able to use this service you need to have an authorization (Zefix-Credentials) for the Zefix API.
 More on that can be read on the
-`Swiss Federal Office of Justice <https://www.bj.admin.ch/bj/de/home/wirtschaft/handelsregister.html>` 's Page on Zefix.
+`Swiss Federal Office of Justice <https://www.bj.admin.ch/bj/de/home/wirtschaft/handelsregister.html>`_'s Page on Zefix.
 There you'll find instructions on how to request access.
 
 Setup
