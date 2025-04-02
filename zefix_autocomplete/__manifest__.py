@@ -13,8 +13,11 @@
     'author': "Abilium GmbH",
     'website': "https://www.abilium.io",
 
-    'category': 'Hidden/Tools',
+    'category': 'Productivity',
     'version': '17.0.0.0.1',
+    'price': '199.90',
+    'currency': 'EUR',
+    'license': 'OPL-1',
     'application': True,
 
     'depends': [
