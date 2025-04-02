@@ -18,7 +18,9 @@ class ResPartner(models.Model):
 
     @api.model
     def enrich_company(self, company_domain, partner_gid, vat, timeout=15):
-        uid = re.sub(r'([.-])|( MWST)', '', vat)
+        uid = ''
+        if vat:
+            uid = re.sub(r'([.-])|( MWST)', '', vat)
         if vat and len(uid) == 12:
             return self._enrich_zefix_company(uid)
         return super(ResPartner, self).enrich_company(company_domain, partner_gid, vat)
