@@ -17,21 +17,6 @@ class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     @api.model
-    def enrich_company(self, company_domain, partner_gid, vat, timeout=15):
-        uid = re.sub(r'([.-])|( MWST)', '', vat)
-        if vat and len(uid) == 12:
-            return self._enrich_zefix_company(uid)
-        return super(ResPartner, self).enrich_company(company_domain, partner_gid, vat)
-
-    @api.model
-    def autocomplete(self, query):
-        results = super(ResPartner, self).autocomplete(query)
-        zefix_results = self._search_zefix(query)
-        if zefix_results:
-            zefix_results.extend(results)
-        return zefix_results
-
-    @api.model
     def _search_zefix(self, query):
         try:
             res = post(
@@ -111,5 +96,42 @@ class ResPartner(models.Model):
             'street': company.get('address').get('street') + ' ' + company.get('address').get('houseNumber'),
             'street2': company.get('address').get('addon'),
             'zip': company.get('address').get('swissZipCode'),
-            'city': company.get('address').get('city')
+            'city': company.get('address').get('city'),
+            'vat': company.get('uid')[:3] + '-' + company.get('uid')[3:6] + '.' + company.get('uid')[6:9] + '.' + company.get('uid')[9:12] + ' MWST',
         }
+
+
+    @api.model
+    def autocomplete_by_name(self, query, query_country_id, timeout=15):
+        results = super(ResPartner, self).autocomplete_by_name(query, query_country_id)
+        zefix_results = self._search_zefix(query)
+        for result in zefix_results:
+            _logger.info(result)
+            result['duns'] = "ZEFIX" + result['zefix_uid']
+            result['city'] = result.get('zefix_uid')[:3] + '-' + result.get('zefix_uid')[3:6] + '.' + result.get('zefix_uid')[6:9] + '.' + result.get('zefix_uid')[9:12] + ' MWST'
+        zefix_results.extend(results)
+        return zefix_results
+
+    @api.model
+    def _format_data_company(self, iap_data):
+        _logger.info("before clean")
+        _logger.info(iap_data)
+        self._iap_replace_location_codes(iap_data)
+        self._iap_replace_language_codes(iap_data)
+        _logger.info("after clean")
+        _logger.info(iap_data)
+        return iap_data
+
+    @api.model
+    def enrich_by_duns(self, duns, timeout=15):
+        _logger.info(duns)
+        if duns[:5] == "ZEFIX":
+            zefix_uid = duns[5:]
+            uid = re.sub(r'([.-])|( MWST)', '', zefix_uid)
+            if len(uid) == 12:
+                return self._enrich_zefix_company(uid)
+        else:
+            response, error = self.env['iap.autocomplete.api']._request_partner_autocomplete('enrich_by_duns', {
+                'duns': duns,
+            }, timeout=timeout)
+        return self._process_enriched_response(response, error)
