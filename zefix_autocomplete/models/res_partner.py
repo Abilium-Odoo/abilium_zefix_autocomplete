@@ -1,31 +1,34 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
+from json import JSONDecodeError
 from requests import post, get, exceptions
 from requests.auth import HTTPBasicAuth
 import logging
+import re
+
 _logger = logging.getLogger(__name__)
 
 ZEFIX_API_PROD = 'https://www.zefix.admin.ch/ZefixPublicREST/api/v1/'
 ZEFIX_API_TEST = 'https://www.zefixintg.admin.ch/ZefixPublicREST/api/v1/'
 
 
-class ZefixAutocomplete(models.Model):
+class ResPartner(models.Model):
     _inherit = 'res.partner'
 
     @api.model
-    def enrich_company(self, company_domain, partner_gid, vat, zefix_uid):
-        if zefix_uid:
-            return self._enrich_zefix_company(zefix_uid)
-        else:
-            return super(ZefixAutocomplete, self).enrich_company(company_domain, partner_gid, vat)
+    def enrich_company(self, company_domain, partner_gid, vat, timeout=15):
+        uid = re.sub(r'([.-])|( MWST)', '', vat)
+        if vat and len(uid) == 12:
+            return self._enrich_zefix_company(uid)
+        return super(ResPartner, self).enrich_company(company_domain, partner_gid, vat)
 
     @api.model
     def autocomplete(self, query):
-        results = super(ZefixAutocomplete, self).autocomplete(query)
-
+        results = super(ResPartner, self).autocomplete(query)
         zefix_results = self._search_zefix(query)
-        zefix_results.extend(results)
+        if zefix_results:
+            zefix_results.extend(results)
         return zefix_results
 
     @api.model
@@ -42,7 +45,12 @@ class ZefixAutocomplete(models.Model):
             if res.status_code != 200:
                 _logger.info('Error Response, Status Code: %d' % res.status_code)
 
-            return self._format_zefix_companies_short_data(res.json())
+            try:
+                js = res.json()
+            except (JSONDecodeError):
+                pass
+                js = []
+            return self._format_zefix_companies_short_data(js)
 
     @api.model
     def _enrich_zefix_company(self, zefix_uid):
@@ -56,7 +64,6 @@ class ZefixAutocomplete(models.Model):
         else:
             if res.status_code != 200:
                 _logger.info('Error Response, Status Code: %d' % res.status_code)
-
             return self._format_zefix_company_full_data(res.json())
 
     @api.model
@@ -73,25 +80,34 @@ class ZefixAutocomplete(models.Model):
     @api.model
     def _format_zefix_companies_short_data(self, companies):
         results = []
-
+        country = self.env['res.country'].search([('code', '=', 'CH')])
+        country_id = ''
+        if country:
+            country_id = {'id': country.id, 'code': country.code, 'display_name': country.display_name}
         for company in companies:
             results.append({
                 'name': company.get('name'),
                 'zefix_uid': company.get('uid'),
                 'vat': company.get('uid')[:3] + '-' + company.get('uid')[3:6] + '.' + company.get('uid')[6:9] + '.' + company.get('uid')[9:12] + ' MWST',
-                'country_id': self.env.ref('base.ch').id
-            })
+                'country_id': country_id,
+                'logo': '',
+                'partner_gid': -1,
+                'company_domain': None,
 
+            })
         return results
 
     @api.model
     def _format_zefix_company_full_data(self, company_list):
         assert len(company_list) == 1
-
         company = company_list[0]
+        country = self.env['res.country'].search([('code', '=', 'CH')])
+        country_id = ''
+        if country:
+            country_id = {'id': country.id, 'code': country.code, 'display_name': country.display_name}
         return {
             'name': company.get('name'),
-            'country_id': self.env.ref('base.ch').id,
+            'country_id': country_id,
             'street': company.get('address').get('street') + ' ' + company.get('address').get('houseNumber'),
             'street2': company.get('address').get('addon'),
             'zip': company.get('address').get('swissZipCode'),

@@ -14,7 +14,7 @@
     'website': "https://www.abilium.io",
 
     'category': 'Hidden/Tools',
-    'version': '0.1',
+    'version': '17.0.0.0.1',
     'application': True,
 
     'depends': [
@@ -27,8 +27,6 @@
     ],
     'assets': {
         'web.assets_backend': [
-            'zefix_autocomplete/static/src/js/*',
-            'zefix_autocomplete/static/src/xml/*'
         ]
     }
 }
